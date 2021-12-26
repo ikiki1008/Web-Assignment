@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script src="./jquery-3.6.0.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.2/dist/js/bootstrap.bundle.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Bree+Serif&family=Gowun+Batang&family=Lato&family=M+PLUS+Rounded+1c&family=Noto+Serif+KR:wght@300&family=Open+Sans:wght@300&family=Poppins:wght@400;700&family=Pushster&family=Ubuntu:wght@700&display=swap" rel="stylesheet">
+    <style>
+        .box {
+            border: 1px solid gray;
+            padding: 1px;
+            border-radius: 5px;
+            border-color: transparent;
+        }
+        span {
+            border: 1px solid rgba(255, 255, 255, 0);
+            padding: 5px;
+            margin: 5px;
+            border-radius: 5px;
+        }
+        h1 {
+            font-family: 'Ubuntu', sans-serif;
+        }
+        body {
+            margin: 50px;
+            text-align: left;  
+            background: linear-gradient( to right, rgb(223, 236, 228), rgb(150, 235, 209), rgb(110, 216, 189), rgb(30, 247, 174) );
+        }
+        #plan {
+            background-color: white;
+            padding: 20px;
+        }
+        #sth {
+            background-color: white;
+            padding: 20px;
+        }
+    </style>
+    <script>
+
+        function gid(id) {return document.getElementById(id);}
+       
+        function keydownHandler() { //new item 목록에 입력하고 엔터누르면 todolist에 추가가되도록한다
+            if(event.keyCode == 13) {
+                pushTokenToList(this.value, "listToDo");
+                this.value = "";
+            }
+        }
+
+        function pushTokenToList(strToken, listName) {
+            let newItem = document.createElement("span");
+            $(newItem).addClass("badge");
+            $(newItem).addClass("bg-success");
+            newItem.innerHTML = strToken;
+            $(newItem).click(spanClickHandler);
+            gid(listName).appendChild(newItem);
+
+            saveButtonClickHandler();
+        }
+
+        //클릭한 객체를 죽인..다..큭!
+        function btnClickHandler() {
+            $(this.parentNode).remove();
+        } 
+        
+        //클릭한 스팬 객체를 listdone 객체의 자식노드로 보낸다
+        function spanClickHandler() {
+            let parentID = this.parentNode.getAttribute('id')
+
+            if(parentID == 'listToDo')
+                gid("listDone").appendChild(this); //listdone에서 클릭한 것을 this에 child로 등록을 시켜준다
+            else
+                gid("listToDo").appendChild(this);
+            
+            saveButtonClickHandler();
+        }
+    
+        function saveList(listName) {
+            // 0. 수집할 정보를 저장할 빈 객체 생성하기
+            let list = {
+                itemList: [],   // span.innerHTML 값들을 저장할 배열
+                listName: listName  //span들이 포함된 div.id
+            }
+            // 1. listName에 포함된 span 모두 가져오기
+            let spanArray = gid(listName).querySelectorAll("span");
+
+            // 2. 각 span의 속성 innerHTML 값을 모으기
+            for(let item of spanArray)
+                list.itemList.push(item.innerHTML);
+
+            // 3. 수집한 정보를 localStorage에 저장하기
+            localStorage.setItem(listName, JSON.stringify(list));
+        }
+
+        function saveButtonClickHandler() {
+            saveList("listToDo");
+            saveList("listDone");
+        }
+
+        function readListFromLocalStorage() {
+            let check = localStorage.getItem("listToDo");
+
+            if(check == null)
+                return;
+            let listToDo = JSON.parse(check);
+            let listDone = JSON.parse(localStorage.getItem("listDone"));
+
+            //차례로 각 리스트의 항목들을 복원
+            for(let item of listToDo.itemList)
+                pushTokenToList(item, listToDo.listName);     
+            for(let item of listDone.itemList)
+                pushTokenToList(item, listDone.listName);
+        }
+
+        $(document).ready(function(){
+            readListFromLocalStorage();
+
+            $("#newItem").keydown(keydownHandler);
+            // $("#saveAll").click(saveButtonClickHandler);
+        });
+
+        //계정만들고 로그인 하는 부분
+        function store(){
+
+        var name = document.getElementById('name');
+        var pw = document.getElementById('pw');
+        var lowerCaseLetters = /[a-z]/g;
+        var upperCaseLetters = /[A-Z]/g;
+        var numbers = /[0-9]/g;
+
+        if(name.value.length == 0){
+            alert('이메일을 작성해주세요');
+
+        }else if(pw.value.length == 0){
+            alert('비밀번호를 입력해주세요');
+
+        }else{
+            localStorage.setItem('name', name.value);
+            localStorage.setItem('pw', pw.value);
+            alert('계정이 만들어졌습니다!');
+            }
+        }
+
+        //체크부분
+        function check(){
+        var storedName = localStorage.getItem('name');
+        var storedPw = localStorage.getItem('pw');
+        var userName = document.getElementById('userName');
+        var userPw = document.getElementById('userPw');
+
+        if(userName.value == storedName && userPw.value == storedPw){
+            alert('로그인에 성공하였습니다');
+        }else{
+            alert('로그인에 실패하였습니다');
+            }
+        }
+        
+    </script>
+</head>
+<body>
+    <h1>DAILY TO DO LIST</h1>
+    <div id="sth">
+        <div class="login">
+            <form name='form-login'>
+                <strong>가입하기</strong>
+                <label for="name">Email</label>
+                <input type="email" id="name" required>
+                <label for="pw">Password</label>
+                <input type="password" id= "pw" required>
+                <input id="rgstr_btn" type="submit" value="Register" onclick="store()">
+            </form>
+        </div>
+        <br>
+        <div class="login">
+            <form name='form-login'>
+                <strong>로그인</strong>
+                <label for="userName">Email</label>
+                <input type="email" id="userName" required>
+                <label for="userPw">Password</label>
+                <input type="password" id= "userPw" required>
+                <input id= "login_btn" type="submit" value="Login" onclick="check()">
+            </form>
+        </div>
+    </div>
+    <br>
+    <div id="plan">
+        WHATS MY PLAN? <input type="text" id="newItem" placeholder="새로운 할 일" size="30" >
+        <br><br>
+        <strong>해야할 일</strong>
+        <div class="box" id="listToDo"></div>
+        <strong>끝낸 일</strong>
+        <div class="box" id="listDone"></div>
+    </div>
+</body>
+</html>
